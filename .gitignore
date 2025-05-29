@@ -1,0 +1,26 @@
+gitignore
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Environments
+.env
+env/
+venv/
+.MLF-CoDA-Project/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Data folders (do NOT track large raw images)
+data/isic2018/train/
+data/isic2018/val/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and checkpoints (optional)
+lightning_logs/
+*.log
