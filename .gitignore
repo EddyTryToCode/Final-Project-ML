@@ -16,6 +16,7 @@ venv/
 # Data folders (do NOT track large raw images)
 data/isic2018/train/
 data/isic2018/val/
+data/isic2018/test/
 
 # OS files
 .DS_Store
@@ -24,3 +25,5 @@ Thumbs.db
 # Logs and checkpoints (optional)
 lightning_logs/
 *.log
+checkpoints/
+

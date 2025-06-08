@@ -2,13 +2,13 @@ import pandas as pd
 import os
 
 # Đường dẫn đến thư mục labels
-label_dir = 'data/isic2018/labels'
+label_dir = '/teamspace/studios/this_studio/Final-Project-ML/data/isic2018/labels'
 
 # 1. Train
 import pandas as pd
 
 # Đọc file one-hot
-df = pd.read_csv('data/isic2018/labels/train_labels.csv')
+df = pd.read_csv('/teamspace/studios/this_studio/Final-Project-ML/data/isic2018/labels/train_labels.csv')
 
 # Xác định các cột nhãn
 label_columns = ['MEL', 'NV', 'BCC', 'AKIEC', 'BKL', 'DF', 'VASC']
@@ -53,4 +53,14 @@ df_val['label_idx'] = df_val['label'].map(label2idx)
 df_val.to_csv(os.path.join(label_dir, 'val_idx.csv'), index=False)
 print("✅ Saved val_idx_num.csv with label index.")
 
+TEST_DIR  = '../data/isic2018/test'
+label_cols = ['MEL','NV','BCC','AKIEC','BKL','DF','VASC']
 
+df_test = pd.read_csv(os.path.join(label_dir, 'test_labels.csv'))
+# chuyển one-hot → label, label_idx
+df_test['label']     = df_test[label_cols].idxmax(axis=1)
+df_test['label_idx'] = df_test[label_cols].values.argmax(axis=1)
+df_test[['image','label','label_idx']].to_csv(
+    os.path.join(label_dir, 'test_idx.csv'), index=False
+)
+print(f"Đã tạo test_idx.csv với {len(df_test)} dòng.")

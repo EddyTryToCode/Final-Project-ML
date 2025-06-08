@@ -1,67 +1,144 @@
-# Self-Supervised SimCLR Pretraining for Skin Lesion Classification
+```markdown
+# Skin Lesion Classification with SimCLR + FixMatch++
 
-## Overview
-This repository implements a two-stage pipeline on the ISIC 2018 Task 3 dataset:
-1. **Self-Supervised Pretraining** with SimCLR on 10 015 unlabeled dermoscopic images  
-2. **Full-Model Fine-Tuning** on the same 10 015 labeled images, evaluated on 1 000 hold-out images  
+This repository implements a state-of-the-art semi-supervised pipeline on the ISIC 2018 Task 3 dataset (skin lesion classification) by combining:
 
-We achieve **78.24 %** balanced accuracy on the official validation set using ResNet-18.
+1. **SimCLR** self-supervised pretraining on ~9 000 unlabeled images  
+2. **FixMatch++** fine-tuning on 10% labeled (~1 000) + unlabeled images with:
+   - Dynamic pseudo-label threshold
+   - MixUp on both labeled & pseudo batches
+   - Label smoothing
+   - EMA teacher
+3. **OneCycleLR** scheduling, **top-3 checkpoint** ensembling, and **Test-Time Augmentation (TTA)**  
 
-## Directory Structure
+---
 
-```plaintext
-final-project-ml/
+## 📂 Repository Structure
+
+```
+
+.
 ├── data/
 │   └── isic2018/
-│       ├── train/                # (ignored by git) raw train images
-│       ├── val/                  # (ignored by git) raw val images
-│       └── labels/               # tracked CSVs only
-│           ├── train_unlabeled.csv
-│           ├── train_labeled_idx.csv
-│           ├── val_idx.csv
-│           ├── val_labels.csv 
-│           ├── train_labels.csv
-│           └── train_labeled.csv
-│
-├── figures/                      # tracked: plots for report
-│   ├── loss_curve.png
-│   ├── acc_curve.png
-│   ├── classification_report.txt
-│   └── confusion_matrix.png
-│
-├── notebooks/                    # tracked
-│   ├── Pretraining-SimCLR.ipynb
-│   └── FineTune-SimCLR.ipynb
-│
-├── src/                          # tracked
-│   ├── create_idx_csv.py
-│   ├── datasets.py
-│   ├── simclr_model.py
-│   └── finetune_model.py
-│
-├── scripts/                      # tracked (optional CLI wrappers)
-│   ├── train_simclr.py
-│   └── train_finetune.py
-│
-├── checkpoints/                  # tracked (optional small ckpt files)
-│   ├── simclr_encoder.pth
-│   └── best_finetuned.pth
-│
+│       ├── labels/
+│       │   ├── train\_labeled.csv      # \~1 001 labeled
+│       │   ├── train\_unlabeled.csv    # \~9 014 unlabeled
+│       │   ├── val_idx.csv                # 193 validation
+│       │   └── test\_idx.csv           # 1 512 test
+│       ├── train/                     # all train images (.jpg)
+│       ├── val/                       # validation images
+│       └── test/                      # test images
+├── notebooks/
+│       ├── checkpoints (fix match path after semi-supervised)
+│       ├── Pretrained\_SimCLR\_Model.ipynb
+│       └── FineTune-SimCLR(latest).ipynb
+├── src/
+│   ├── create\_idx\_csv.py
+│   ├── create\_splits.py
+│   └── train\_labels.py 
 ├── paper/
-│   ├── main.tex
-│   ├── references.bib
-│   └── figures/                  # copy of plots for LaTeX
-│
-├── environment.yml               # tracked
-├── requirements.txt              # tracked
-├── README.md                     # this file
-└── .gitignore                    # see below
+│   └── ML\_Final.pdf
+├── environment.yml
+└── README.md
 
-Getting Started
-1. Clone & create environment
-2. Download ISIC 2018 data
-3. Preprocess labels
-4. Pretrain SimCLR
-5. Fine-tune & evaluate
-6. Build report
+````
+
+---
+
+## 🔧 Environment & Installation
+
+1. **Clone** this repo and enter directory:
+   ```bash
+   git clone <https://github.com/EddyTryToCode/Final-Project-ML>
+````
+
+2. **Create conda environment**:
+
+   ```bash
+   conda env create -f environment.yml
+   conda activate <env_name>
+   ```
+
+   Or use `pip install -r requirements.txt` if provided.
+
+---
+
+## 📊 Data Preparation
+
+Download ISIC2018 Task 3 
+
+Place images under `data/isic2018/`:
+
+* **Images**:
+
+  * `data/isic2018/train/`
+  * `data/isic2018/val/`
+  * `data/isic2018/test/`
+
+use all "tool" in src to change orginal labels
+
+* **Labels CSVs** (`data/isic2018/labels/`):
+
+  * `train_labeled.csv` (10% \~1 001)
+  * `train_unlabeled.csv` (\~9 014)
+  * `val.csv` (193)
+  * `test_idx.csv` (1 512)
+
+CSV format:
+
+```csv
+image,label,label_idx
+ISIC_0000000,MV,1
+ISIC_0000001,NV,0
+...
+```
+---
+
+## 🚀 Usage
+
+### 1. Pretrain SimCLR
+
+- Use notebook : .../notebooks/Pretrained_SimCLR_ Model.ipynb
+
+### 2. Fine-tune with FixMatch++ + Ensemble & TTA on Test
+
+- Use notebook : .../notebooks/FineTune-SimCLR(lastest).ipynb
+
+
+## 📈 Results
+
+| Method                     |   Val ACC  |  Test ACC  |
+| -------------------------- | :--------: | :--------: |
+| Supervised (ResNet18)      |   54–60%   |   59–64%   |
+| FixMatch (baseline)        |   60–65%   |   63–66%   |
+| **This work (FixMatch++)** | **73–75%** | **70.30%** |
+
+---
+
+## 📚 Citation
+
+```bibtex
+@article{codella2019skin,
+  title={Skin Lesion Analysis Toward Melanoma Detection 2018: A Challenge Hosted by the International Skin Imaging Collaboration (ISIC)},
+  author={Codella, Noel and Rotemberg, Veronica and Tschandl, Philipp and others},
+  journal={arXiv preprint arXiv:1902.03368},
+  year={2019}
+}
+
+@inproceedings{yourname2025fixmatchpp,
+  title={FixMatch++: Enhanced Semi-Supervised Learning for Skin Lesion Classification},
+  author={YourName, First and Coauthor, Second},
+  booktitle={NeurIPS Workshop on Medical AI},
+  year={2025}
+}
+
+@article{codella2019skin,
+  title={Skin Lesion Analysis Toward Melanoma Detection 2018: A Challenge Hosted by the International Skin Imaging Collaboration (ISIC)},
+  author={Codella, Noel and Rotemberg, Veronica and Tschandl, Philipp and Celebi, Emre and Dusza, Stephen and Gutman, David and Helba, Brian and Kalloo, Aadi and Liopyris, Konstantinos and Marchetti, Michael and Kittler, Harald and Halpern, Allan},
+  journal={arXiv preprint arXiv:1902.03368},
+  year={2019},
+  url={https://arxiv.org/abs/1902.03368}
+}
+```
+
 
