@@ -1,5 +1,4 @@
 
-```markdown
 # Skin Lesion Classification with SimCLR + FixMatch++
 
 This repository implements a state-of-the-art semi-supervised pipeline on the ISIC 2018 Task 3 dataset (skin lesion classification) by combining:
@@ -15,7 +14,6 @@ This repository implements a state-of-the-art semi-supervised pipeline on the IS
 ---
 
 ## 📂 Repository Structure
-
 ```
 .
 ├── data/
